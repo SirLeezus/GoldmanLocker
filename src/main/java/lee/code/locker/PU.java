@@ -11,7 +11,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class PluginUtility {
+public class PU {
 
     public String format(String format) {
         return ChatColor.translateAlternateColorCodes('&', format);

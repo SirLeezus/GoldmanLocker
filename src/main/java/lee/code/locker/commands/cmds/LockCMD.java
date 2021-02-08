@@ -45,7 +45,7 @@ public class LockCMD implements CommandExecutor {
                                 if (block.getState().getBlockData() instanceof WallSign) {
 
                                     Location location = block.getLocation();
-                                    String lockSign = plugin.getPluginUtility().formatLockLocation(location);
+                                    String lockSign = plugin.getPU().formatLockLocation(location);
 
                                     if (Bukkit.getOnlinePlayers().contains(Bukkit.getPlayer(args[1]))) {
                                         target = Bukkit.getPlayer(args[1]);
@@ -63,7 +63,7 @@ public class LockCMD implements CommandExecutor {
                                                 Directional directional = (Directional) block.getState().getBlockData();
                                                 Block blockBehind = block.getRelative(directional.getFacing().getOppositeFace());
 
-                                                player.sendMessage(Lang.PREFIX.getString(null) + Lang.MESSAGE_ADD_TRUST_SUCCESSFUL.getString(new String[] { target.getName(), plugin.getPluginUtility().formatBlockName(blockBehind.getType().name()) }));
+                                                player.sendMessage(Lang.PREFIX.getString(null) + Lang.MESSAGE_ADD_TRUST_SUCCESSFUL.getString(new String[] { target.getName(), plugin.getPU().formatBlockName(blockBehind.getType().name()) }));
                                                 return true;
                                             } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_ADD_ALREADY_ADDED.getString(new String[] { target.getName() }));
                                         } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_ADD_OWNER.getString(null));
@@ -82,7 +82,7 @@ public class LockCMD implements CommandExecutor {
                                 if (block.getState().getBlockData() instanceof WallSign) {
 
                                     Location location = block.getLocation();
-                                    String lockSign = plugin.getPluginUtility().formatLockLocation(location);
+                                    String lockSign = plugin.getPU().formatLockLocation(location);
 
                                     if (SQL.isLockOwner(lockSign, uuid)) {
 
@@ -91,10 +91,10 @@ public class LockCMD implements CommandExecutor {
 
                                         if (SQL.getTrustedToLock(lockSign).contains(target)) {
                                             SQL.removeLockTrusted (lockSign, target);
-                                            player.sendMessage(Lang.PREFIX.getString(null) + Lang.MESSAGE_REMOVE_TRUST_SUCCESSFUL.getString(new String[] { target, plugin.getPluginUtility().formatBlockName(blockBehind.getType().name()) }));
+                                            player.sendMessage(Lang.PREFIX.getString(null) + Lang.MESSAGE_REMOVE_TRUST_SUCCESSFUL.getString(new String[] { target, plugin.getPU().formatBlockName(blockBehind.getType().name()) }));
                                             return true;
 
-                                        } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_REMOVE_NOT_TRUSTED.getString(new String[] { target, plugin.getPluginUtility().formatBlockName(blockBehind.getType().name()) }));
+                                        } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_REMOVE_NOT_TRUSTED.getString(new String[] { target, plugin.getPU().formatBlockName(blockBehind.getType().name()) }));
                                     } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_REMOVE_NOT_OWNER.getString(new String[] { Bukkit.getOfflinePlayer(SQL.getLockOwner(lockSign)).getName() }));
                                 } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCK_SIGN_NOT_FOUND.getString(null));
                             } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_REMOVE_TARGET_PLAYER.getString(null));
@@ -111,7 +111,7 @@ public class LockCMD implements CommandExecutor {
                 lines.add("&r");
                 lines.add(Lang.MESSAGE_HELP_DIVIDER.getString(null));
 
-                for (String line : lines) player.sendMessage(plugin.getPluginUtility().format(line));
+                for (String line : lines) player.sendMessage(plugin.getPU().format(line));
 
             }
         }

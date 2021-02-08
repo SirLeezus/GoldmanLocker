@@ -9,12 +9,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class GoldmanLocker extends JavaPlugin {
 
-    @Getter private PluginUtility pluginUtility;
+    @Getter private PU pU;
     @Getter private SQLite sqLite;
 
     @Override
     public void onEnable() {
-        this.pluginUtility = new PluginUtility();
+        this.pU = new PU();
         this.sqLite = new SQLite();
 
         sqLite.connect();
