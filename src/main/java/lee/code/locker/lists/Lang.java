@@ -9,7 +9,7 @@ public enum Lang {
     PREFIX("&6&lLocker &e➔ &r"),
     MESSAGE_HELP_DIVIDER("&6▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"),
     SIGN_INFO_HEADER("&e--------- &7[ &c&lLock Info &7] &e---------"),
-    SIGN_INFO_OWNER("&4&lOwner&7: &6{0}"),
+    SIGN_INFO_OWNER("&4&lOwner&7: &e{0}"),
     SIGN_INFO_TRUSTED("&a&lTrusted&7: &2{0}"),
     SIGN_INFO_FOOTER("&e---------------------------------"),
     MESSAGE_HELP_TITLE("                      &e-== &c&l&nLock Help&r &e==-"),
