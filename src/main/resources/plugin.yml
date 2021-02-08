@@ -1,0 +1,9 @@
+name: GoldmanLocker
+main: lee.code.locker.GoldmanLocker
+version: ${project.version}
+api-version: 1.16
+author: Lee
+commands:
+  lock:
+    description: Main command for locker plugin.
+    permission: locker.use.lock
