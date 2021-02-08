@@ -8,10 +8,10 @@ import org.bukkit.ChatColor;
 public enum Lang {
     PREFIX("&6&lLocker &e➔ &r"),
     MESSAGE_HELP_DIVIDER("&6▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"),
-    SIGN_INFO_HEADER("&e--------- &7[ &c&lLock Info &7] &e---------"),
+    SIGN_INFO_HEADER("&6--------- &7[ &c&lLock Info &7] &6---------"),
     SIGN_INFO_OWNER("&4&lOwner&7: &e{0}"),
     SIGN_INFO_TRUSTED("&a&lTrusted&7: &2{0}"),
-    SIGN_INFO_FOOTER("&e---------------------------------"),
+    SIGN_INFO_FOOTER("&6--------------------------------"),
     MESSAGE_HELP_TITLE("                      &e-== &c&l&nLock Help&r &e==-"),
     MESSAGE_HELP_ADD("&e/lock add &f<player> &c| &7Add a player to your lock sign."),
     MESSAGE_HELP_REMOVE("&e/lock remove &f<player> &c| &7Remove a player from your lock sign."),
