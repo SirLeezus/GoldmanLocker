@@ -83,7 +83,7 @@ public class SignListener implements Listener {
                     String lockSign = getLockSign(block);
 
                     if (SQL.isLocked(lockSign)) {
-                        if (!SQL.isLockOwner(lockSign, uuid)) {
+                        if (!SQL.isLockOwner(lockSign, uuid) && !SQL.isLockTrusted(lockSign, uuid)) {
                             player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCKED.getString(new String[] { plugin.getPluginUtility().formatBlockName(block.getType().name()), Bukkit.getOfflinePlayer(SQL.getLockOwner(lockSign)).getName() }));
                             e.setCancelled(true);
                         }
@@ -92,6 +92,7 @@ public class SignListener implements Listener {
 
                     Sign sign = (Sign) block.getState();
                     String lockSign = plugin.getPluginUtility().formatLockLocation(sign.getLocation());
+
                     if (SQL.isLocked(lockSign)) {
 
                         String owner = Bukkit.getOfflinePlayer(SQL.getLockOwner(lockSign)).getName();
@@ -108,6 +109,15 @@ public class SignListener implements Listener {
                         if (SQL.isLockOwner(lockSign, uuid)) {
                             nameSignCheck(sign, uuid);
                         } else e.setCancelled(true);
+                    } else {
+                        if (sign.getLine(0).equals(plugin.getPluginUtility().format("&6[&cLocked&6]"))) {
+
+                            Location location = block.getLocation();
+                            ItemStack dropSign = new ItemStack(Material.valueOf(block.getType().name().replace("_WALL", "")));
+                            location.getWorld().dropItemNaturally(location, dropSign);
+                            block.setType(Material.AIR);
+                            block.getWorld().playSound(block.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 1);
+                        }
                     }
                 }
             }
@@ -300,11 +310,5 @@ public class SignListener implements Listener {
             sign.setLine(1, plugin.getPluginUtility().format("&e" + Bukkit.getOfflinePlayer(owner).getName()));
         }
         sign.update();
-    }
-
-    private void removeSign(Block block) {
-        Location location = block.getLocation();
-        location.getWorld().dropItemNaturally(location, new ItemStack(block.getType()));
-        block.setType(Material.AIR);
     }
 }
