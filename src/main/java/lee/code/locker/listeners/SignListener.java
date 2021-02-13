@@ -24,6 +24,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -43,8 +44,9 @@ public class SignListener implements Listener {
         String lockSign = plugin.getPU().formatLockLocation(location);
         Block block = e.getBlock();
         BlockData data = block.getBlockData();
+        String line1 = e.getLine(0);
 
-        if (e.getLine(0).equals("[lock]")) {
+        if (line1 != null && line1.equals("[lock]")) {
 
             if (data instanceof Directional) {
 
@@ -75,16 +77,14 @@ public class SignListener implements Listener {
         Action action = e.getAction();
         Block block = e.getClickedBlock();
 
-        if (e.hasBlock()) {
+        if (block != null) {
             if (action.equals(Action.RIGHT_CLICK_BLOCK)) {
-
                 if (plugin.getPU().getSupportedBlocks().contains(block.getType().name())) {
-
                     String lockSign = getLockSign(block);
 
                     if (SQL.isLocked(lockSign)) {
                         if (!SQL.isLockOwner(lockSign, uuid) && !SQL.isLockTrusted(lockSign, uuid)) {
-                            player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCKED.getString(new String[] { plugin.getPU().formatBlockName(block.getType().name()), Bukkit.getOfflinePlayer(SQL.getLockOwner(lockSign)).getName() }));
+                            player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCKED.getString(new String[]{plugin.getPU().formatBlockName(block.getType().name()), Bukkit.getOfflinePlayer(SQL.getLockOwner(lockSign)).getName()}));
                             e.setCancelled(true);
                         }
                     }
@@ -100,9 +100,9 @@ public class SignListener implements Listener {
 
                         player.sendMessage(Lang.SIGN_INFO_HEADER.getString(null));
                         player.sendMessage("");
-                        player.sendMessage(Lang.SIGN_INFO_OWNER.getString(new String[] { owner }));
+                        player.sendMessage(Lang.SIGN_INFO_OWNER.getString(new String[]{owner}));
                         player.sendMessage("");
-                        player.sendMessage(Lang.SIGN_INFO_TRUSTED.getString(new String[] { trusted }));
+                        player.sendMessage(Lang.SIGN_INFO_TRUSTED.getString(new String[]{trusted}));
                         player.sendMessage("");
                         player.sendMessage(Lang.SIGN_INFO_FOOTER.getString(null));
 
@@ -252,33 +252,44 @@ public class SignListener implements Listener {
     private String getLockSign(Block block) {
         GoldmanLocker plugin = GoldmanLocker.getPlugin();
 
-        String[] faces = {"EAST", "NORTH", "SOUTH", "WEST"};
+        BlockState blockState = block.getState();
+        BlockFace[] faces = new BlockFace[]{BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST};
 
-        for (String face : faces) {
-            if (block.getRelative(BlockFace.valueOf(face)).getState() instanceof Chest && block.getState() instanceof Chest) {
+        for (BlockFace face : faces) {
 
-                Chest linkedChestState = (Chest) block.getRelative(BlockFace.valueOf(face)).getState();
-                Inventory linkedChestInventory = linkedChestState.getInventory();
+            Block relativeBlock = block.getRelative(face);
+            BlockState relativeBlockState = relativeBlock.getState();
 
-                Chest chestState = (Chest) block.getState();
-                Inventory chestInventory = chestState.getInventory();
+            if (blockState instanceof Chest && relativeBlockState instanceof Chest) {
 
-                if (linkedChestInventory instanceof DoubleChestInventory && chestInventory instanceof DoubleChestInventory) {
+                Chest chest = (Chest) blockState;
+                Chest relativeChest = (Chest) relativeBlockState;
 
-                    DoubleChest linkedDoubleChest = (DoubleChest) linkedChestInventory.getHolder();
-                    DoubleChest doubleChest = (DoubleChest) chestInventory.getHolder();
+                InventoryHolder inventoryHolder = chest.getInventory().getHolder();
+                InventoryHolder relativeInventoryHolder = relativeChest.getInventory().getHolder();
 
-                    if (linkedDoubleChest.getLocation().equals(doubleChest.getLocation())) {
-                        Block chest = block.getRelative(BlockFace.valueOf(face));
-                        for (String face2 : faces) {
-                            if (chest.getRelative(BlockFace.valueOf(face2)).getState().getBlockData() instanceof WallSign) {
+                if (inventoryHolder instanceof DoubleChest && relativeInventoryHolder instanceof DoubleChest) {
 
-                                Sign sign = (Sign) chest.getRelative(BlockFace.valueOf(face2)).getState();
+                    DoubleChestInventory inventory = (DoubleChestInventory) inventoryHolder.getInventory();
+                    DoubleChestInventory relativeInventory = (DoubleChestInventory) relativeInventoryHolder.getInventory();
 
-                                Directional directional = (Directional) sign.getBlockData();
-                                Block blockBehind = chest.getRelative(BlockFace.valueOf(face2)).getRelative(directional.getFacing().getOppositeFace());
+                    Location location = inventory.getLocation();
+                    Location relativeLocation = relativeInventory.getLocation();
 
-                                if (blockBehind.equals(chest)) {
+                    if (location != null && location.equals(relativeLocation)) {
+
+                        for (BlockFace relativeFace : faces) {
+                            Block relative = relativeBlock.getRelative(relativeFace);
+                            BlockState relativeState = relative.getState();
+
+                            if (relativeState.getBlockData() instanceof WallSign) {
+
+                                Sign sign = (Sign) relativeState;
+                                Directional signDirectional = (Directional) sign.getBlockData();
+                                Block relativeBlockBehind = relative.getRelative(signDirectional.getFacing().getOppositeFace());
+
+                                if (relativeBlockBehind.equals(relativeBlock)) {
+
                                     if (sign.getLine(0).equals(plugin.getPU().format("&6[&cLocked&6]"))) {
                                         return plugin.getPU().formatLockLocation(sign.getLocation());
                                     }
@@ -287,13 +298,13 @@ public class SignListener implements Listener {
                         }
                     }
                 }
-            } else if (block.getRelative(BlockFace.valueOf(face)).getState().getBlockData() instanceof WallSign) {
-                Sign sign = (Sign) block.getRelative(BlockFace.valueOf(face)).getState();
+            } else if (relativeBlockState.getBlockData() instanceof WallSign) {
+                Sign sign = (Sign) relativeBlockState;
 
-                Directional directional = (Directional) sign.getBlockData();
-                Block blockBehind = block.getRelative(BlockFace.valueOf(face)).getRelative(directional.getFacing().getOppositeFace());
+                Directional signDirectional = (Directional) sign.getBlockData();
+                Block relativeBlockBehind = relativeBlock.getRelative(signDirectional.getFacing().getOppositeFace());
 
-                if (blockBehind.equals(block)) {
+                if (relativeBlockBehind.equals(block)) {
                     if (sign.getLine(0).equals(plugin.getPU().format("&6[&cLocked&6]"))) {
                         return plugin.getPU().formatLockLocation(sign.getLocation());
                     }
