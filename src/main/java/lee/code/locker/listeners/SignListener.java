@@ -23,7 +23,6 @@ import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.DoubleChestInventory;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
@@ -101,7 +100,6 @@ public class SignListener implements Listener {
                         player.sendMessage(Lang.SIGN_INFO_HEADER.getString(null));
                         player.sendMessage("");
                         player.sendMessage(Lang.SIGN_INFO_OWNER.getString(new String[]{owner}));
-                        player.sendMessage("");
                         player.sendMessage(Lang.SIGN_INFO_TRUSTED.getString(new String[]{trusted}));
                         player.sendMessage("");
                         player.sendMessage(Lang.SIGN_INFO_FOOTER.getString(null));
@@ -114,9 +112,12 @@ public class SignListener implements Listener {
 
                             Location location = block.getLocation();
                             ItemStack dropSign = new ItemStack(Material.valueOf(block.getType().name().replace("_WALL", "")));
-                            location.getWorld().dropItemNaturally(location, dropSign);
-                            block.setType(Material.AIR);
-                            block.getWorld().playSound(block.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 1);
+
+                            if (location.getWorld() != null) {
+                                location.getWorld().dropItemNaturally(location, dropSign);
+                                block.setType(Material.AIR);
+                                block.getWorld().playSound(block.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 1);
+                            }
                         }
                     }
                 }
@@ -166,10 +167,8 @@ public class SignListener implements Listener {
                         player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCKED.getString(new String[] { plugin.getPU().formatBlockName(blockBehind.getType().name()), Bukkit.getOfflinePlayer(SQL.getLockOwner(lockSign)).getName() }));
                         e.setCancelled(true);
                     } else {
-
                         SQL.removeLock(lockSign);
                         block.getWorld().playSound(block.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 1);
-
                         player.sendMessage(Lang.PREFIX.getString(null) + Lang.MESSAGE_REMOVE_LOCK_SUCCESSFUL.getString(new String[] { plugin.getPU().formatBlockName(blockBehind.getType().name()) }));
                     }
                 }
@@ -177,24 +176,12 @@ public class SignListener implements Listener {
         }
     }
 
-    private boolean blockHasSign(Block block) {
-        String[] faces = {"EAST", "NORTH", "SOUTH", "WEST"};
-
-        for (String face : faces) {
-
-            if (block.getRelative(BlockFace.valueOf(face)).getState().getBlockData() instanceof WallSign) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     @EventHandler
     public void onPistonMove(BlockPistonExtendEvent e) {
         GoldmanLocker plugin = GoldmanLocker.getPlugin();
         SQLite SQL = plugin.getSqLite();
 
-        for (Block block : new ArrayList<Block>(e.getBlocks())) {
+        for (Block block : new ArrayList<>(e.getBlocks())) {
             if (plugin.getPU().getSupportedBlocks().contains(block.getType().name())) {
                 String lockSign = getLockSign(block);
                 if (SQL.isLocked(lockSign)) {
@@ -217,7 +204,7 @@ public class SignListener implements Listener {
         GoldmanLocker plugin = GoldmanLocker.getPlugin();
         SQLite SQL = plugin.getSqLite();
 
-        for (Block block : new ArrayList<Block>(e.blockList())) {
+        for (Block block : new ArrayList<>(e.blockList())) {
             if (plugin.getPU().getSupportedBlocks().contains(block.getType().name())) {
                 String lockSign = getLockSign(block);
                 if (SQL.isLocked(lockSign)) {
@@ -240,13 +227,25 @@ public class SignListener implements Listener {
         GoldmanLocker plugin = GoldmanLocker.getPlugin();
         SQLite SQL = plugin.getSqLite();
 
-        if (plugin.getPU().getSupportedBlocks().contains(e.getSource().getLocation().getBlock().getType().name()) && e.getSource().getType() != InventoryType.HOPPER) {
+        if (e.getSource().getLocation() != null) {
             Block block = e.getSource().getLocation().getBlock();
-            String lockSign = getLockSign(block);
-            if (SQL.isLocked(lockSign)) {
-                e.setCancelled(true);
+            if (plugin.getPU().getSupportedBlocks().contains(block.getType().name()) && e.getSource().getType() != InventoryType.HOPPER) {
+                String lockSign = getLockSign(block);
+                if (SQL.isLocked(lockSign)) {
+                    e.setCancelled(true);
+                }
             }
         }
+    }
+
+    private boolean blockHasSign(Block block) {
+        BlockFace[] faces = new BlockFace[]{BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST};
+        for (BlockFace face : faces) {
+            if (block.getRelative(face).getState().getBlockData() instanceof WallSign) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private String getLockSign(Block block) {

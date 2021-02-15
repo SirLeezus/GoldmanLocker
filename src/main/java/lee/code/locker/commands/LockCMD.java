@@ -1,4 +1,4 @@
-package lee.code.locker.commands.cmds;
+package lee.code.locker.commands;
 
 import lee.code.locker.GoldmanLocker;
 import lee.code.locker.database.SQLite;

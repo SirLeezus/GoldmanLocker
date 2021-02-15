@@ -1,4 +1,4 @@
-package lee.code.locker.commands.tabs;
+package lee.code.locker.commands;
 
 import lee.code.locker.GoldmanLocker;
 import org.bukkit.command.Command;
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class LockTab implements TabCompleter {
+public class TabCompletion implements TabCompleter {
 
     private final List<String> blank = new ArrayList<>();
 

@@ -1,7 +1,7 @@
 package lee.code.locker;
 
-import lee.code.locker.commands.cmds.LockCMD;
-import lee.code.locker.commands.tabs.LockTab;
+import lee.code.locker.commands.LockCMD;
+import lee.code.locker.commands.TabCompletion;
 import lee.code.locker.database.SQLite;
 import lee.code.locker.listeners.SignListener;
 import lombok.Getter;
@@ -31,10 +31,8 @@ public class GoldmanLocker extends JavaPlugin {
     }
 
     private void registerCommands() {
-
-        //cmds
         getCommand("lock").setExecutor(new LockCMD());
-        getCommand("lock").setTabCompleter(new LockTab());
+        getCommand("lock").setTabCompleter(new TabCompletion());
     }
 
     private void registerListeners() {
