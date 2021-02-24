@@ -17,7 +17,7 @@ public enum Lang {
     MESSAGE_HELP_REMOVE("&e/lock remove &f<player> &c| &7Remove a player from your lock sign."),
     MESSAGE_LOCK_SUCCESSFUL("&aThis {0} block is now locked for you!"),
     MESSAGE_REMOVE_LOCK_SUCCESSFUL("&7That {0} block is no longer locked."),
-    MESSAGE_ADD_TRUST_SUCCESSFUL("&aYou successfully added &6{0} &ato this {1} lock!"),
+    MESSAGE_ADD_TRUST_SUCCESSFUL("&aYou successfully added &6{0} &ato this lock!"),
     MESSAGE_REMOVE_TRUST_SUCCESSFUL("&aYou successfully removed &6{0} &afrom your {1} lock."),
     ERROR_LOCKED("&cThis {0} block is locked by &6{1}&c."),
     ERROR_TRUST_ADD_TARGET_PLAYER("&cYou need to input a player to add to your lock sign."),

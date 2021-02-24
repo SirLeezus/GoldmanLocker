@@ -1,17 +1,20 @@
 package lee.code.locker.commands;
 
 import lee.code.locker.GoldmanLocker;
-import lee.code.locker.database.SQLite;
 import lee.code.locker.lists.Lang;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
+import org.bukkit.block.TileState;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.type.WallSign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,80 +29,99 @@ public class LockCMD implements CommandExecutor {
         if (sender instanceof Player) {
             Player player = (Player) sender;
             UUID uuid = player.getUniqueId();
-            SQLite SQL = plugin.getSqLite();
 
             if (args.length > 0) {
+                String arg = args[0].toLowerCase();
+                switch (arg) {
+                    case "add":
+                        if (args.length > 1) {
+                            String target = args[1];
+                            UUID targetUUID = Bukkit.getPlayerUniqueId(target);
+                            Block block = player.getTargetBlock(null, 5);
+                            if (block.getState().getBlockData() instanceof WallSign) {
+                                if (targetUUID != null && plugin.getPU().getOnlinePlayers(player).contains(args[1])) {
 
-                    String arg = args[0].toLowerCase();
+                                    TileState state = (TileState) block.getState();
 
-                    switch (arg) {
+                                    UUID ownerUUID = plugin.getPU().getLockOwner(state);
+                                    String targetName = Bukkit.getOfflinePlayer(targetUUID).getName();
+                                    List<UUID> trusted = plugin.getPU().getLockTrusted(state);
+                                    PersistentDataContainer container = state.getPersistentDataContainer();
+                                    NamespacedKey trustedKey = new NamespacedKey(plugin, "lock-trusted");
 
-                        //lock add player
-                        case "add":
-
-                            if (args.length > 1) {
-
-                                Player target = player;
-                                Block block = player.getTargetBlock(null, 5);
-
-                                if (block.getState().getBlockData() instanceof WallSign) {
-
-                                    Location location = block.getLocation();
-                                    String lockSign = plugin.getPU().formatLockLocation(location);
-
-                                    if (Bukkit.getOnlinePlayers().contains(Bukkit.getPlayer(args[1]))) {
-                                        target = Bukkit.getPlayer(args[1]);
-                                    } else {
-                                        player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_PLAYER_NOT_ONLINE.getString(new String[]{args[1]}));
-                                        return true;
-                                    }
-
-                                    if (SQL.isLockOwner(lockSign, uuid)) {
-                                        if (!target.equals(player)) {
-
-                                            if (!SQL.getTrustedToLock(lockSign).contains(target.getName())) {
-                                                SQL.addLockTrusted(lockSign, target.getUniqueId());
-
+                                    if (ownerUUID != null) {
+                                        String ownerName = Bukkit.getOfflinePlayer(ownerUUID).getName();
+                                        if (ownerUUID.equals(uuid)) {
+                                            if (!ownerUUID.equals(targetUUID)) {
+                                                String sTrusted = targetUUID.toString();
+                                                if (trusted != null) {
+                                                    if (!trusted.contains(targetUUID)) {
+                                                        sTrusted = StringUtils.join(trusted, ",") + "," + targetUUID.toString();
+                                                    } else {
+                                                        player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_ADD_ALREADY_ADDED.getString(new String[]{targetName}));
+                                                        return true;
+                                                    }
+                                                }
                                                 Directional directional = (Directional) block.getState().getBlockData();
                                                 Block blockBehind = block.getRelative(directional.getFacing().getOppositeFace());
 
-                                                player.sendMessage(Lang.PREFIX.getString(null) + Lang.MESSAGE_ADD_TRUST_SUCCESSFUL.getString(new String[] { target.getName(), plugin.getPU().formatBlockName(blockBehind.getType().name()) }));
+                                                container.set(trustedKey, PersistentDataType.STRING, sTrusted);
+                                                state.update();
+
+                                                player.sendMessage(Lang.PREFIX.getString(null) + Lang.MESSAGE_ADD_TRUST_SUCCESSFUL.getString(new String[]{targetName, plugin.getPU().formatBlockName(blockBehind.getType().name())}));
                                                 return true;
-                                            } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_ADD_ALREADY_ADDED.getString(new String[] { target.getName() }));
-                                        } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_ADD_OWNER.getString(null));
-                                    } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_ADD_NOT_OWNER.getString(new String[] { Bukkit.getOfflinePlayer(SQL.getLockOwner(lockSign)).getName() }));
-                                } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCK_SIGN_NOT_FOUND.getString(null));
-                            } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_ADD_TARGET_PLAYER.getString(null));
-                            break;
+                                            } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_ADD_OWNER.getString(null));
+                                        } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_ADD_NOT_OWNER.getString(new String[]{ownerName}));
+                                    } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCK_SIGN_NOT_FOUND.getString(null));
+                                } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_PLAYER_NOT_ONLINE.getString(new String[]{args[1]}));
+                            } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCK_SIGN_NOT_FOUND.getString(null));
+                        } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_ADD_TARGET_PLAYER.getString(null));
+                        break;
 
-                        case "remove":
+                    case "remove":
+                        if (args.length > 1) {
+                            String target = args[1];
+                            UUID targetUUID = Bukkit.getPlayerUniqueId(target);
+                            Block block = player.getTargetBlock(null, 5);
+                            if (block.getState().getBlockData() instanceof WallSign) {
 
-                            if (args.length > 1) {
+                                if (targetUUID != null) {
+                                    TileState state = (TileState) block.getState();
 
-                                String target = args[1];
-                                Block block = player.getTargetBlock(null, 5);
+                                    UUID ownerUUID = plugin.getPU().getLockOwner(state);
+                                    String targetName = Bukkit.getOfflinePlayer(targetUUID).getName();
+                                    List<UUID> trusted = plugin.getPU().getLockTrusted(state);
+                                    PersistentDataContainer container = state.getPersistentDataContainer();
+                                    NamespacedKey trustedKey = new NamespacedKey(plugin, "lock-trusted");
+                                    Directional directional = (Directional) block.getState().getBlockData();
+                                    Block blockBehind = block.getRelative(directional.getFacing().getOppositeFace());
 
-                                if (block.getState().getBlockData() instanceof WallSign) {
+                                    if (ownerUUID != null) {
+                                        String ownerName = Bukkit.getOfflinePlayer(ownerUUID).getName();
+                                        if (ownerUUID.equals(uuid)) {
+                                            if (trusted != null) {
+                                                if (trusted.contains(targetUUID)) {
 
-                                    Location location = block.getLocation();
-                                    String lockSign = plugin.getPU().formatLockLocation(location);
+                                                    String sTrusted;
+                                                    List<UUID> newTrusted = new ArrayList<>();
+                                                    for (UUID tPlayer : trusted)
+                                                        if (!tPlayer.equals(targetUUID)) newTrusted.add(tPlayer);
+                                                    sTrusted = StringUtils.join(newTrusted, ",");
 
-                                    if (SQL.isLockOwner(lockSign, uuid)) {
+                                                    container.set(trustedKey, PersistentDataType.STRING, sTrusted);
+                                                    state.update();
 
-                                        Directional directional = (Directional) block.getState().getBlockData();
-                                        Block blockBehind = block.getRelative(directional.getFacing().getOppositeFace());
-
-                                        if (SQL.getTrustedToLock(lockSign).contains(target)) {
-                                            SQL.removeLockTrusted (lockSign, target);
-                                            player.sendMessage(Lang.PREFIX.getString(null) + Lang.MESSAGE_REMOVE_TRUST_SUCCESSFUL.getString(new String[] { target, plugin.getPU().formatBlockName(blockBehind.getType().name()) }));
-                                            return true;
-
-                                        } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_REMOVE_NOT_TRUSTED.getString(new String[] { target, plugin.getPU().formatBlockName(blockBehind.getType().name()) }));
-                                    } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_REMOVE_NOT_OWNER.getString(new String[] { Bukkit.getOfflinePlayer(SQL.getLockOwner(lockSign)).getName() }));
-                                } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCK_SIGN_NOT_FOUND.getString(null));
-                            } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_REMOVE_TARGET_PLAYER.getString(null));
-                            break;
-                    }
+                                                    player.sendMessage(Lang.PREFIX.getString(null) + Lang.MESSAGE_REMOVE_TRUST_SUCCESSFUL.getString(new String[]{targetName, plugin.getPU().formatBlockName(blockBehind.getType().name())}));
+                                                    return true;
+                                                } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_REMOVE_NOT_TRUSTED.getString(new String[]{targetName, plugin.getPU().formatBlockName(blockBehind.getType().name())}));
+                                            } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_REMOVE_NOT_TRUSTED.getString(new String[]{targetName, plugin.getPU().formatBlockName(blockBehind.getType().name())}));
+                                        } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_REMOVE_NOT_OWNER.getString(new String[]{ownerName}));
+                                    } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCK_SIGN_NOT_FOUND.getString(null));
+                                }
+                            } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCK_SIGN_NOT_FOUND.getString(null));
+                        } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_REMOVE_TARGET_PLAYER.getString(null));
+                        break;
+                }
             } else {
 
                 List<String> lines = new ArrayList<>();

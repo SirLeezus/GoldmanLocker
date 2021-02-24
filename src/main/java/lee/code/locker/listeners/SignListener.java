@@ -1,12 +1,8 @@
 package lee.code.locker.listeners;
 
 import lee.code.locker.GoldmanLocker;
-import lee.code.locker.database.SQLite;
 import lee.code.locker.lists.Lang;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.block.*;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
@@ -24,23 +20,19 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 
-import java.util.ArrayList;
-import java.util.UUID;
+import java.util.*;
 
 public class SignListener implements Listener {
 
     @EventHandler
     public void onSignEditEvent(SignChangeEvent e) {
-
         GoldmanLocker plugin = GoldmanLocker.getPlugin();
-        SQLite SQL = plugin.getSqLite();
 
         Player player = e.getPlayer();
         UUID uuid = player.getUniqueId();
-        Location location = e.getBlock().getLocation();
-        String lockSign = plugin.getPU().formatLockLocation(location);
         Block block = e.getBlock();
         BlockData data = block.getBlockData();
         String line1 = e.getLine(0);
@@ -54,11 +46,18 @@ public class SignListener implements Listener {
 
                 if (plugin.getPU().getSupportedBlocks().contains(blockBehind.getType().name())) {
 
-                    if (getLockSign(blockBehind).equals("n")) {
+                    if (getLockSign(blockBehind) == null) {
                         e.setLine(0, plugin.getPU().format("&6[&cLocked&6]"));
                         e.setLine(1, plugin.getPU().format("&e" + e.getPlayer().getName()));
 
-                        SQL.createLock(lockSign, uuid, "n");
+                        TileState state = (TileState) block.getState();
+                        PersistentDataContainer container = state.getPersistentDataContainer();
+                        NamespacedKey owner = new NamespacedKey(plugin, "lock-owner");
+                        NamespacedKey trusted = new NamespacedKey(plugin, "lock-trusted");
+                        container.set(owner, PersistentDataType.STRING, uuid.toString());
+                        container.set(trusted, PersistentDataType.STRING, "");
+                        state.update();
+
                         player.sendMessage(Lang.PREFIX.getString(null) + Lang.MESSAGE_LOCK_SUCCESSFUL.getString(new String[] { plugin.getPU().formatBlockName(blockBehind.getType().name()) }));
                     } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_BLOCK_ALREADY_HAS_LOCK.getString(null));
                 }
@@ -69,7 +68,6 @@ public class SignListener implements Listener {
     @EventHandler
     public void onPlayerInteractEvent(PlayerInteractEvent e) {
         GoldmanLocker plugin = GoldmanLocker.getPlugin();
-        SQLite SQL = plugin.getSqLite();
 
         Player player = e.getPlayer();
         UUID uuid = player.getUniqueId();
@@ -79,45 +77,39 @@ public class SignListener implements Listener {
         if (block != null) {
             if (action.equals(Action.RIGHT_CLICK_BLOCK)) {
                 if (plugin.getPU().getSupportedBlocks().contains(block.getType().name())) {
-                    String lockSign = getLockSign(block);
-
-                    if (SQL.isLocked(lockSign)) {
-                        if (!SQL.isLockOwner(lockSign, uuid) && !SQL.isLockTrusted(lockSign, uuid)) {
-                            player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCKED.getString(new String[]{plugin.getPU().formatBlockName(block.getType().name()), Bukkit.getOfflinePlayer(SQL.getLockOwner(lockSign)).getName()}));
-                            e.setCancelled(true);
+                    TileState lockSign = getLockSign(block);
+                    if (lockSign != null) {
+                        UUID owner =  plugin.getPU().getLockOwner(lockSign);
+                        List<UUID> trusted = plugin.getPU().getLockTrusted(lockSign);
+                        if (trusted == null || !trusted.contains(uuid)) {
+                            if (owner != null && !owner.equals(uuid)) {
+                                player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCKED.getString(new String[]{plugin.getPU().formatBlockName(block.getType().name()), Bukkit.getOfflinePlayer(owner).getName()}));
+                                e.setCancelled(true);
+                            }
                         }
                     }
                 } else if (block.getState().getBlockData() instanceof WallSign) {
 
                     Sign sign = (Sign) block.getState();
-                    String lockSign = plugin.getPU().formatLockLocation(sign.getLocation());
 
-                    if (SQL.isLocked(lockSign)) {
+                    TileState state = (TileState) block.getState();
+                    PersistentDataContainer container = state.getPersistentDataContainer();
+                    NamespacedKey key = new NamespacedKey(plugin, "lock-owner");
 
-                        String owner = Bukkit.getOfflinePlayer(SQL.getLockOwner(lockSign)).getName();
-                        String trusted = String.join(", ", SQL.getTrustedToLock(lockSign));
-
-                        player.sendMessage(Lang.SIGN_INFO_HEADER.getString(null));
-                        player.sendMessage("");
-                        player.sendMessage(Lang.SIGN_INFO_OWNER.getString(new String[]{owner}));
-                        player.sendMessage(Lang.SIGN_INFO_TRUSTED.getString(new String[]{trusted}));
-                        player.sendMessage("");
-                        player.sendMessage(Lang.SIGN_INFO_FOOTER.getString(null));
-
-                        if (SQL.isLockOwner(lockSign, uuid)) {
-                            nameSignCheck(sign, uuid);
-                        } else e.setCancelled(true);
-                    } else {
-                        if (sign.getLine(0).equals(plugin.getPU().format("&6[&cLocked&6]"))) {
-
-                            Location location = block.getLocation();
-                            ItemStack dropSign = new ItemStack(Material.valueOf(block.getType().name().replace("_WALL", "")));
-
-                            if (location.getWorld() != null) {
-                                location.getWorld().dropItemNaturally(location, dropSign);
-                                block.setType(Material.AIR);
-                                block.getWorld().playSound(block.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 1);
-                            }
+                    if (container.has(key, PersistentDataType.STRING)) {
+                        UUID owner =  plugin.getPU().getLockOwner(state);
+                        List<UUID> trusted = plugin.getPU().getLockTrusted(state);
+                        String trustedNames = "";
+                        if (trusted != null) trustedNames = plugin.getPU().getTrustedString(trusted);
+                        if (owner != null) {
+                            if (owner.equals(uuid)) nameSignCheck(sign, uuid);
+                            player.sendMessage(Lang.SIGN_INFO_HEADER.getString(null));
+                            player.sendMessage("");
+                            player.sendMessage(Lang.SIGN_INFO_OWNER.getString(new String[]{Bukkit.getOfflinePlayer(owner).getName()}));
+                            player.sendMessage(Lang.SIGN_INFO_TRUSTED.getString(new String[]{trustedNames}));
+                            player.sendMessage("");
+                            player.sendMessage(Lang.SIGN_INFO_FOOTER.getString(null));
+                            e.setCancelled(true);
                         }
                     }
                 }
@@ -128,23 +120,20 @@ public class SignListener implements Listener {
     @EventHandler
     public void onBlockBreak(BlockBreakEvent e) {
         GoldmanLocker plugin = GoldmanLocker.getPlugin();
-        SQLite SQL = plugin.getSqLite();
 
         Player player = e.getPlayer();
         UUID uuid = player.getUniqueId();
         Block block = e.getBlock();
 
         if (plugin.getPU().getSupportedBlocks().contains(block.getType().name())) {
-
-            String lockSign = getLockSign(block);
-
-            if (SQL.isLocked(lockSign)) {
-                if (!SQL.isLockOwner(lockSign, uuid)) {
-                    player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCKED.getString(new String[] { plugin.getPU().formatBlockName(block.getType().name()), Bukkit.getOfflinePlayer(SQL.getLockOwner(lockSign)).getName() }));
+            TileState lockSign = getLockSign(block);
+            if (lockSign != null) {
+                UUID owner =  plugin.getPU().getLockOwner(lockSign);
+                if (owner != null && !owner.equals(uuid)) {
+                    player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCKED.getString(new String[] { plugin.getPU().formatBlockName(block.getType().name()), Bukkit.getOfflinePlayer(owner).getName() }));
                     e.setCancelled(true);
                 } else {
                     if (blockHasSign(block)) {
-                        SQL.removeLock(lockSign);
                         block.getWorld().playSound(block.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 1);
                         player.sendMessage(Lang.PREFIX.getString(null) + Lang.MESSAGE_REMOVE_LOCK_SUCCESSFUL.getString(new String[] { plugin.getPU().formatBlockName(block.getType().name()) }));
                     }
@@ -152,25 +141,23 @@ public class SignListener implements Listener {
             }
         } else if (block.getState().getBlockData() instanceof WallSign) {
 
-            Sign sign = (Sign) block.getState();
-
             BlockData data = block.getBlockData();
             Directional directional = (Directional) data;
             Block blockBehind = block.getRelative(directional.getFacing().getOppositeFace());
 
-            if (sign.getLine(0).equals(plugin.getPU().format("&6[&cLocked&6]"))) {
+            TileState state = (TileState) block.getState();
+            PersistentDataContainer container = state.getPersistentDataContainer();
+            NamespacedKey key = new NamespacedKey(plugin, "lock-owner");
 
-                String lockSign = plugin.getPU().formatLockLocation(sign.getLocation());
+            if (container.has(key, PersistentDataType.STRING)) {
+                UUID owner = plugin.getPU().getLockOwner(state);
+                if (owner != null && !owner.equals(uuid)) {
+                    player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCKED.getString(new String[] { plugin.getPU().formatBlockName(blockBehind.getType().name()), Bukkit.getOfflinePlayer(owner).getName() }));
+                    e.setCancelled(true);
+                } else {
+                    block.getWorld().playSound(block.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 1);
+                    player.sendMessage(Lang.PREFIX.getString(null) + Lang.MESSAGE_REMOVE_LOCK_SUCCESSFUL.getString(new String[] { plugin.getPU().formatBlockName(blockBehind.getType().name()) }));
 
-                if (SQL.isLocked(lockSign)) {
-                    if (!SQL.isLockOwner(lockSign, uuid)) {
-                        player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCKED.getString(new String[] { plugin.getPU().formatBlockName(blockBehind.getType().name()), Bukkit.getOfflinePlayer(SQL.getLockOwner(lockSign)).getName() }));
-                        e.setCancelled(true);
-                    } else {
-                        SQL.removeLock(lockSign);
-                        block.getWorld().playSound(block.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 1);
-                        player.sendMessage(Lang.PREFIX.getString(null) + Lang.MESSAGE_REMOVE_LOCK_SUCCESSFUL.getString(new String[] { plugin.getPU().formatBlockName(blockBehind.getType().name()) }));
-                    }
                 }
             }
         }
@@ -179,22 +166,16 @@ public class SignListener implements Listener {
     @EventHandler
     public void onPistonMove(BlockPistonExtendEvent e) {
         GoldmanLocker plugin = GoldmanLocker.getPlugin();
-        SQLite SQL = plugin.getSqLite();
 
         for (Block block : new ArrayList<>(e.getBlocks())) {
             if (plugin.getPU().getSupportedBlocks().contains(block.getType().name())) {
-                String lockSign = getLockSign(block);
-                if (SQL.isLocked(lockSign)) {
-                    e.setCancelled(true);
-                }
+                TileState lockSign = getLockSign(block);
+                if (lockSign != null) e.setCancelled(true);
             } else if (block.getState().getBlockData() instanceof WallSign) {
-                Sign sign = (Sign) block.getState();
-                if (sign.getLine(0).equals(plugin.getPU().format("&6[&cLocked&6]"))) {
-                    String lockSign = plugin.getPU().formatLockLocation(sign.getLocation());
-                    if (SQL.isLocked(lockSign)) {
-                        e.setCancelled(true);
-                    }
-                }
+                TileState state = (TileState) block.getState();
+                PersistentDataContainer container = state.getPersistentDataContainer();
+                NamespacedKey key = new NamespacedKey(plugin, "lock-owner");
+                if (container.has(key, PersistentDataType.STRING)) e.setCancelled(true);
             }
         }
     }
@@ -202,22 +183,16 @@ public class SignListener implements Listener {
     @EventHandler
     public void onExplodeEvent(EntityExplodeEvent e) {
         GoldmanLocker plugin = GoldmanLocker.getPlugin();
-        SQLite SQL = plugin.getSqLite();
 
         for (Block block : new ArrayList<>(e.blockList())) {
             if (plugin.getPU().getSupportedBlocks().contains(block.getType().name())) {
-                String lockSign = getLockSign(block);
-                if (SQL.isLocked(lockSign)) {
-                    e.blockList().remove(block);
-                }
+                TileState lockSign = getLockSign(block);
+                if (lockSign != null) e.blockList().remove(block);
             } else if (block.getState().getBlockData() instanceof WallSign) {
-                Sign sign = (Sign) block.getState();
-                if (sign.getLine(0).equals(plugin.getPU().format("&6[&cLocked&6]"))) {
-                    String lockSign = plugin.getPU().formatLockLocation(sign.getLocation());
-                    if (SQL.isLocked(lockSign)) {
-                        e.blockList().remove(block);
-                    }
-                }
+                TileState state = (TileState) block.getState();
+                PersistentDataContainer container = state.getPersistentDataContainer();
+                NamespacedKey key = new NamespacedKey(plugin, "lock-owner");
+                if (container.has(key, PersistentDataType.STRING)) e.blockList().remove(block);
             }
         }
     }
@@ -225,15 +200,11 @@ public class SignListener implements Listener {
     @EventHandler
     public void onHopperMoveEvent(InventoryMoveItemEvent e) {
         GoldmanLocker plugin = GoldmanLocker.getPlugin();
-        SQLite SQL = plugin.getSqLite();
-
         if (e.getSource().getLocation() != null) {
             Block block = e.getSource().getLocation().getBlock();
             if (plugin.getPU().getSupportedBlocks().contains(block.getType().name()) && e.getSource().getType() != InventoryType.HOPPER) {
-                String lockSign = getLockSign(block);
-                if (SQL.isLocked(lockSign)) {
-                    e.setCancelled(true);
-                }
+                TileState lockSign = getLockSign(block);
+                if (lockSign != null) e.setCancelled(true);
             }
         }
     }
@@ -248,7 +219,7 @@ public class SignListener implements Listener {
         return false;
     }
 
-    private String getLockSign(Block block) {
+    private TileState getLockSign(Block block) {
         GoldmanLocker plugin = GoldmanLocker.getPlugin();
 
         BlockState blockState = block.getState();
@@ -290,7 +261,10 @@ public class SignListener implements Listener {
                                 if (relativeBlockBehind.equals(relativeBlock)) {
 
                                     if (sign.getLine(0).equals(plugin.getPU().format("&6[&cLocked&6]"))) {
-                                        return plugin.getPU().formatLockLocation(sign.getLocation());
+                                        TileState state = (TileState) relativeState;
+                                        PersistentDataContainer container = state.getPersistentDataContainer();
+                                        NamespacedKey owner = new NamespacedKey(plugin, "lock-owner");
+                                        if (container.has(owner, PersistentDataType.STRING)) return state;
                                     }
                                 }
                             }
@@ -305,12 +279,15 @@ public class SignListener implements Listener {
 
                 if (relativeBlockBehind.equals(block)) {
                     if (sign.getLine(0).equals(plugin.getPU().format("&6[&cLocked&6]"))) {
-                        return plugin.getPU().formatLockLocation(sign.getLocation());
+                        TileState state = (TileState) relativeBlockState;
+                        PersistentDataContainer container = state.getPersistentDataContainer();
+                        NamespacedKey owner = new NamespacedKey(plugin, "lock-owner");
+                        if (container.has(owner, PersistentDataType.STRING)) return state;
                     }
                 }
             }
         }
-        return "n";
+        return null;
     }
 
     private void nameSignCheck(Sign sign, UUID owner) {

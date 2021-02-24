@@ -29,7 +29,7 @@ public class TabCompletion implements TabCompleter {
                     return StringUtil.copyPartialMatches(args[1], plugin.getPU().getOnlinePlayers(player), new ArrayList<>());
             } else if (args[0].equals("remove")) {
                 if (args.length == 2)
-                    return StringUtil.copyPartialMatches(args[1], plugin.getSqLite().getTrustedToLock(plugin.getPU().formatLockLocation(player.getTargetBlock(null, 5).getLocation())), new ArrayList<>());
+                    return StringUtil.copyPartialMatches(args[1], plugin.getPU().getOnlinePlayers(player), new ArrayList<>());
             }
         }
         return blank;
