@@ -92,25 +92,21 @@ public class SignListener implements Listener {
 
                     Sign sign = (Sign) block.getState();
 
-                    TileState state = (TileState) block.getState();
-                    PersistentDataContainer container = state.getPersistentDataContainer();
-                    NamespacedKey key = new NamespacedKey(plugin, "lock-owner");
+                    TileState lockSign = (TileState) block.getState();
 
-                    if (container.has(key, PersistentDataType.STRING)) {
-                        UUID owner =  plugin.getPU().getLockOwner(state);
-                        List<UUID> trusted = plugin.getPU().getLockTrusted(state);
-                        String trustedNames = "";
-                        if (owner != null) {
-                            if (trusted != null) trustedNames = plugin.getPU().getTrustedString(trusted);
-                            if (owner.equals(uuid)) nameSignCheck(sign, uuid);
-                            player.sendMessage(Lang.SIGN_INFO_HEADER.getString(null));
-                            player.sendMessage("");
-                            player.sendMessage(Lang.SIGN_INFO_OWNER.getString(new String[]{Bukkit.getOfflinePlayer(owner).getName()}));
-                            player.sendMessage(Lang.SIGN_INFO_TRUSTED.getString(new String[]{trustedNames}));
-                            player.sendMessage("");
-                            player.sendMessage(Lang.SIGN_INFO_FOOTER.getString(null));
-                            e.setCancelled(true);
-                        }
+                    UUID owner =  plugin.getPU().getLockOwner(lockSign);
+                    List<UUID> trusted = plugin.getPU().getLockTrusted(lockSign);
+                    String trustedNames = "";
+                    if (owner != null) {
+                        if (trusted != null) trustedNames = plugin.getPU().getTrustedString(trusted);
+                        if (owner.equals(uuid)) nameSignCheck(sign, uuid);
+                        player.sendMessage(Lang.SIGN_INFO_HEADER.getString(null));
+                        player.sendMessage("");
+                        player.sendMessage(Lang.SIGN_INFO_OWNER.getString(new String[]{Bukkit.getOfflinePlayer(owner).getName()}));
+                        player.sendMessage(Lang.SIGN_INFO_TRUSTED.getString(new String[]{trustedNames}));
+                        player.sendMessage("");
+                        player.sendMessage(Lang.SIGN_INFO_FOOTER.getString(null));
+                        e.setCancelled(true);
                     }
                 }
             }
@@ -211,11 +207,7 @@ public class SignListener implements Listener {
 
     private boolean blockHasSign(Block block) {
         BlockFace[] faces = new BlockFace[]{BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST};
-        for (BlockFace face : faces) {
-            if (block.getRelative(face).getState().getBlockData() instanceof WallSign) {
-                return true;
-            }
-        }
+        for (BlockFace face : faces) if (block.getRelative(face).getState().getBlockData() instanceof WallSign) return true;
         return false;
     }
 
@@ -259,13 +251,10 @@ public class SignListener implements Listener {
                                 Block relativeBlockBehind = relative.getRelative(signDirectional.getFacing().getOppositeFace());
 
                                 if (relativeBlockBehind.equals(relativeBlock)) {
-
-                                    if (sign.getLine(0).equals(plugin.getPU().format("&6[&cLocked&6]"))) {
-                                        TileState state = (TileState) relativeState;
-                                        PersistentDataContainer container = state.getPersistentDataContainer();
-                                        NamespacedKey owner = new NamespacedKey(plugin, "lock-owner");
-                                        if (container.has(owner, PersistentDataType.STRING)) return state;
-                                    }
+                                    TileState state = (TileState) relativeState;
+                                    PersistentDataContainer container = state.getPersistentDataContainer();
+                                    NamespacedKey owner = new NamespacedKey(plugin, "lock-owner");
+                                    if (container.has(owner, PersistentDataType.STRING)) return state;
                                 }
                             }
                         }
@@ -278,12 +267,10 @@ public class SignListener implements Listener {
                 Block relativeBlockBehind = relativeBlock.getRelative(signDirectional.getFacing().getOppositeFace());
 
                 if (relativeBlockBehind.equals(block)) {
-                    if (sign.getLine(0).equals(plugin.getPU().format("&6[&cLocked&6]"))) {
-                        TileState state = (TileState) relativeBlockState;
-                        PersistentDataContainer container = state.getPersistentDataContainer();
-                        NamespacedKey owner = new NamespacedKey(plugin, "lock-owner");
-                        if (container.has(owner, PersistentDataType.STRING)) return state;
-                    }
+                    TileState state = (TileState) relativeBlockState;
+                    PersistentDataContainer container = state.getPersistentDataContainer();
+                    NamespacedKey owner = new NamespacedKey(plugin, "lock-owner");
+                    if (container.has(owner, PersistentDataType.STRING)) return state;
                 }
             }
         }

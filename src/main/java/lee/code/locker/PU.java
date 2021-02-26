@@ -60,10 +60,7 @@ public class PU {
 
     public String getTrustedString(List<UUID> trusted){
         List<String> names = new ArrayList<>();
-        for (UUID tPlayer : trusted) {
-            names.add(Bukkit.getOfflinePlayer(tPlayer).getName());
-            System.out.println(Bukkit.getOfflinePlayer(tPlayer).getName());
-        }
+        for (UUID tPlayer : trusted) names.add(Bukkit.getOfflinePlayer(tPlayer).getName());
         return StringUtils.join(names, ", ");
     }
 }
