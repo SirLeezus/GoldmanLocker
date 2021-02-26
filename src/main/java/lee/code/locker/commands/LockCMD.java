@@ -39,7 +39,7 @@ public class LockCMD implements CommandExecutor {
                             UUID targetUUID = Bukkit.getPlayerUniqueId(target);
                             Block block = player.getTargetBlock(null, 5);
                             if (block.getState().getBlockData() instanceof WallSign) {
-                                if (targetUUID != null && plugin.getPU().getOnlinePlayers(player).contains(args[1])) {
+                                if (targetUUID != null && plugin.getPU().getOnlinePlayers().contains(args[1])) {
 
                                     TileState state = (TileState) block.getState();
 
@@ -85,6 +85,9 @@ public class LockCMD implements CommandExecutor {
                             Block block = player.getTargetBlock(null, 5);
                             if (block.getState().getBlockData() instanceof WallSign) {
 
+                                Directional directional = (Directional) block.getState().getBlockData();
+                                Block blockBehind = block.getRelative(directional.getFacing().getOppositeFace());
+
                                 if (targetUUID != null) {
                                     TileState state = (TileState) block.getState();
 
@@ -93,8 +96,6 @@ public class LockCMD implements CommandExecutor {
                                     List<UUID> trusted = plugin.getPU().getLockTrusted(state);
                                     PersistentDataContainer container = state.getPersistentDataContainer();
                                     NamespacedKey trustedKey = new NamespacedKey(plugin, "lock-trusted");
-                                    Directional directional = (Directional) block.getState().getBlockData();
-                                    Block blockBehind = block.getRelative(directional.getFacing().getOppositeFace());
 
                                     if (ownerUUID != null) {
                                         String ownerName = Bukkit.getOfflinePlayer(ownerUUID).getName();
@@ -104,9 +105,9 @@ public class LockCMD implements CommandExecutor {
 
                                                     String sTrusted;
                                                     List<UUID> newTrusted = new ArrayList<>();
-                                                    for (UUID tPlayer : trusted)
-                                                        if (!tPlayer.equals(targetUUID)) newTrusted.add(tPlayer);
+                                                    for (UUID tPlayer : trusted) if (!tPlayer.equals(targetUUID)) newTrusted.add(tPlayer);
                                                     sTrusted = StringUtils.join(newTrusted, ",");
+                                                    if (sTrusted == null) sTrusted = "";
 
                                                     container.set(trustedKey, PersistentDataType.STRING, sTrusted);
                                                     state.update();
@@ -117,7 +118,7 @@ public class LockCMD implements CommandExecutor {
                                             } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_REMOVE_NOT_TRUSTED.getString(new String[]{targetName, plugin.getPU().formatBlockName(blockBehind.getType().name())}));
                                         } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_REMOVE_NOT_OWNER.getString(new String[]{ownerName}));
                                     } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCK_SIGN_NOT_FOUND.getString(null));
-                                }
+                                } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_REMOVE_NOT_TRUSTED.getString(new String[]{args[1], plugin.getPU().formatBlockName(blockBehind.getType().name())}));
                             } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCK_SIGN_NOT_FOUND.getString(null));
                         } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_REMOVE_TARGET_PLAYER.getString(null));
                         break;

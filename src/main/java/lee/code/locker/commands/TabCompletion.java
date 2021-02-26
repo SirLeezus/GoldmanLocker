@@ -20,16 +20,15 @@ public class TabCompletion implements TabCompleter {
         GoldmanLocker plugin = GoldmanLocker.getPlugin();
 
         if (sender instanceof Player) {
-            Player player = (Player) sender;
 
             if (args.length == 1) {
                 return StringUtil.copyPartialMatches(args[0], Arrays.asList("add", "remove"), new ArrayList<>());
             } else if (args[0].equals("add")) {
                 if (args.length == 2)
-                    return StringUtil.copyPartialMatches(args[1], plugin.getPU().getOnlinePlayers(player), new ArrayList<>());
+                    return StringUtil.copyPartialMatches(args[1], plugin.getPU().getOnlinePlayers(), new ArrayList<>());
             } else if (args[0].equals("remove")) {
                 if (args.length == 2)
-                    return StringUtil.copyPartialMatches(args[1], plugin.getPU().getOnlinePlayers(player), new ArrayList<>());
+                    return StringUtil.copyPartialMatches(args[1], plugin.getPU().getOnlinePlayers(), new ArrayList<>());
             }
         }
         return blank;

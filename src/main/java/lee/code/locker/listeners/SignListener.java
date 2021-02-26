@@ -100,8 +100,8 @@ public class SignListener implements Listener {
                         UUID owner =  plugin.getPU().getLockOwner(state);
                         List<UUID> trusted = plugin.getPU().getLockTrusted(state);
                         String trustedNames = "";
-                        if (trusted != null) trustedNames = plugin.getPU().getTrustedString(trusted);
                         if (owner != null) {
+                            if (trusted != null) trustedNames = plugin.getPU().getTrustedString(trusted);
                             if (owner.equals(uuid)) nameSignCheck(sign, uuid);
                             player.sendMessage(Lang.SIGN_INFO_HEADER.getString(null));
                             player.sendMessage("");

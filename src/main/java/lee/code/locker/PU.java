@@ -30,11 +30,9 @@ public class PU {
         return name.replaceAll("_", " ").toLowerCase();
     }
 
-    public List<String> getOnlinePlayers(Player playerAsking) {
+    public List<String> getOnlinePlayers() {
         List<String> players = new ArrayList<>();
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            if (!player.getName().equals(playerAsking.getName())) players.add(player.getName());
-        }
+        for (Player player : Bukkit.getOnlinePlayers()) players.add(player.getName());
         return players;
     }
 
@@ -64,6 +62,7 @@ public class PU {
         List<String> names = new ArrayList<>();
         for (UUID tPlayer : trusted) {
             names.add(Bukkit.getOfflinePlayer(tPlayer).getName());
+            System.out.println(Bukkit.getOfflinePlayer(tPlayer).getName());
         }
         return StringUtils.join(names, ", ");
     }
