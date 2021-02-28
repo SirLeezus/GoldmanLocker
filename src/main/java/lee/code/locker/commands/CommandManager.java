@@ -4,6 +4,7 @@ import lee.code.locker.GoldmanLocker;
 import lee.code.locker.commands.subcommands.Add;
 import lee.code.locker.commands.subcommands.Admin;
 import lee.code.locker.commands.subcommands.Remove;
+import lee.code.locker.commands.subcommands.SignHelp;
 import lee.code.locker.lists.Lang;
 import lombok.Getter;
 import org.bukkit.command.Command;
@@ -18,6 +19,7 @@ public class CommandManager implements CommandExecutor {
     @Getter private final ArrayList<SubCommand> subCommands = new ArrayList<>();
 
     public CommandManager() {
+        subCommands.add(new SignHelp());
         subCommands.add(new Add());
         subCommands.add(new Remove());
         subCommands.add(new Admin());
@@ -56,9 +58,7 @@ public class CommandManager implements CommandExecutor {
             lines.add(Lang.MESSAGE_HELP_DIVIDER.getString(null));
             for (String line : lines) p.sendMessage(plugin.getPU().format(line));
             return true;
-        }
-
-        if (args.length > 0) {
+        } else if (args.length > 0) {
             for (int i = 0; i < getSubCommands().size(); i++) {
                 if (args[0].equalsIgnoreCase(getSubCommands().get(i).getName())) {
                     getSubCommands().get(i).performConsole(sender, args);

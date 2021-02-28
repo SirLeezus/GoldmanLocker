@@ -19,7 +19,7 @@ import java.util.*;
 public class TabCompletion implements TabCompleter {
 
     private final List<String> blank = new ArrayList<>();
-    private final List<String> subCommands = Arrays.asList("add", "remove", "admin");
+    private final List<String> subCommands = Arrays.asList("add", "remove", "admin", "signhelp", "help");
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
