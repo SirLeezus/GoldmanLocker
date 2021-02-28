@@ -32,6 +32,7 @@ public enum Lang {
     ERROR_TRUST_REMOVE_NOT_TRUSTED("&cThe player &6{0} &cis not trusted to this {1} lock."),
     ERROR_TRUST_ADD_OWNER("&cYou can't add yourself as trusted if you're the owner of the lock sign. I hope you can see why that would be silly."),
     ERROR_TRUST_ADD_ALREADY_ADDED("&cThe player &6{0} &cis already added to this lock sign. You can right-click the lock sign to get the trusted info."),
+    ERROR_TRUSTED_MAX("&cYou already have a max of {0} players trusted to this lock."),
     ERROR_BLOCK_ALREADY_HAS_LOCK("&cThis block already has a sign lock."),
     ;
 

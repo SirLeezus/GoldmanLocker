@@ -3,6 +3,7 @@ package lee.code.locker.commands.subcommands;
 import lee.code.locker.GoldmanLocker;
 import lee.code.locker.commands.SubCommand;
 import lee.code.locker.lists.Lang;
+import lee.code.locker.lists.Values;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -72,7 +73,10 @@ public class Add extends SubCommand {
                                     String sTrusted = targetUUID.toString();
                                     if (trusted != null) {
                                         if (!trusted.contains(targetUUID)) {
-                                            sTrusted = StringUtils.join(trusted, ",") + "," + targetUUID.toString();
+                                            if (trusted.size() >= Values.MAX_TRUSTED.getValue()) {
+                                                player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUSTED_MAX.getString(new String[] { String.valueOf(Values.MAX_TRUSTED.getValue()) }));
+                                                return;
+                                            } else sTrusted = StringUtils.join(trusted, ",") + "," + targetUUID.toString();
                                         } else {
                                             player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_ADD_ALREADY_ADDED.getString(new String[]{targetName}));
                                             return;
