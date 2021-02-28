@@ -1,6 +1,7 @@
 package lee.code.locker;
 
 import lee.code.locker.lists.SupportedBlocks;
+import lee.code.locker.lists.Values;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -9,6 +10,7 @@ import org.bukkit.block.TileState;
 import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitScheduler;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -58,9 +60,16 @@ public class PU {
         } else return null;
     }
 
-    public String getTrustedString(List<UUID> trusted){
+    public String getTrustedString(List<UUID> trusted) {
         List<String> names = new ArrayList<>();
         for (UUID tPlayer : trusted) names.add(Bukkit.getOfflinePlayer(tPlayer).getName());
         return StringUtils.join(names, ", ");
+    }
+
+    public void addPlayerClickDelay(UUID uuid) {
+        GoldmanLocker plugin = GoldmanLocker.getPlugin();
+        plugin.getData().addPlayerClickDelay(uuid);
+        BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
+        scheduler.runTaskLater(plugin, () -> plugin.getData().removePlayerClickDelay(uuid), Values.CLICK_DELAY.getValue());
     }
 }

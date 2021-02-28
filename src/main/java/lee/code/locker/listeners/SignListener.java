@@ -49,6 +49,8 @@ public class SignListener implements Listener {
                     if (getLockSign(blockBehind) == null) {
                         e.setLine(0, plugin.getPU().format("&6[&cLocked&6]"));
                         e.setLine(1, plugin.getPU().format("&e" + e.getPlayer().getName()));
+                        e.setLine(2, "");
+                        e.setLine(3, "");
 
                         TileState state = (TileState) block.getState();
                         PersistentDataContainer container = state.getPersistentDataContainer();
@@ -73,16 +75,22 @@ public class SignListener implements Listener {
         UUID uuid = player.getUniqueId();
         Action action = e.getAction();
         Block block = e.getClickedBlock();
+        boolean hasAdminBypass = plugin.getData().hasAdminBypass(uuid);
 
         if (block != null) {
             if (action.equals(Action.RIGHT_CLICK_BLOCK)) {
                 if (plugin.getPU().getSupportedBlocks().contains(block.getType().name())) {
                     TileState lockSign = getLockSign(block);
                     if (lockSign != null) {
+
+                        if (plugin.getData().hasPlayerClickDelay(uuid)) {
+                            e.setCancelled(true); return;
+                        } else plugin.getPU().addPlayerClickDelay(uuid);
+
                         UUID owner =  plugin.getPU().getLockOwner(lockSign);
                         List<UUID> trusted = plugin.getPU().getLockTrusted(lockSign);
                         if (trusted == null || !trusted.contains(uuid)) {
-                            if (owner != null && !owner.equals(uuid)) {
+                            if (owner != null && !owner.equals(uuid) && !hasAdminBypass) {
                                 player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCKED.getString(new String[]{plugin.getPU().formatBlockName(block.getType().name()), Bukkit.getOfflinePlayer(owner).getName()}));
                                 e.setCancelled(true);
                             }
@@ -90,23 +98,34 @@ public class SignListener implements Listener {
                     }
                 } else if (block.getState().getBlockData() instanceof WallSign) {
 
-                    Sign sign = (Sign) block.getState();
+                    TileState state = (TileState) block.getState();
+                    PersistentDataContainer container = state.getPersistentDataContainer();
+                    NamespacedKey key = new NamespacedKey(plugin, "lock-owner");
 
-                    TileState lockSign = (TileState) block.getState();
+                    if (container.has(key, PersistentDataType.STRING)) {
 
-                    UUID owner =  plugin.getPU().getLockOwner(lockSign);
-                    List<UUID> trusted = plugin.getPU().getLockTrusted(lockSign);
-                    String trustedNames = "";
-                    if (owner != null) {
-                        if (trusted != null) trustedNames = plugin.getPU().getTrustedString(trusted);
-                        if (owner.equals(uuid)) nameSignCheck(sign, uuid);
-                        player.sendMessage(Lang.SIGN_INFO_HEADER.getString(null));
-                        player.sendMessage("");
-                        player.sendMessage(Lang.SIGN_INFO_OWNER.getString(new String[]{Bukkit.getOfflinePlayer(owner).getName()}));
-                        player.sendMessage(Lang.SIGN_INFO_TRUSTED.getString(new String[]{trustedNames}));
-                        player.sendMessage("");
-                        player.sendMessage(Lang.SIGN_INFO_FOOTER.getString(null));
-                        e.setCancelled(true);
+                        if (plugin.getData().hasPlayerClickDelay(uuid)) {
+                            e.setCancelled(true); return;
+                        } else plugin.getPU().addPlayerClickDelay(uuid);
+
+                        Sign sign = (Sign) block.getState();
+                        TileState lockSign = (TileState) block.getState();
+
+                        UUID owner =  plugin.getPU().getLockOwner(lockSign);
+                        List<UUID> trusted = plugin.getPU().getLockTrusted(lockSign);
+                        String trustedNames = "";
+
+                        if (owner != null) {
+                            if (trusted != null) trustedNames = plugin.getPU().getTrustedString(trusted);
+                            if (owner.equals(uuid)) nameSignCheck(sign, uuid);
+                            player.sendMessage(Lang.SIGN_INFO_HEADER.getString(null));
+                            player.sendMessage("");
+                            player.sendMessage(Lang.SIGN_INFO_OWNER.getString(new String[]{Bukkit.getOfflinePlayer(owner).getName()}));
+                            player.sendMessage(Lang.SIGN_INFO_TRUSTED.getString(new String[]{trustedNames}));
+                            player.sendMessage("");
+                            player.sendMessage(Lang.SIGN_INFO_FOOTER.getString(null));
+                            e.setCancelled(true);
+                        }
                     }
                 }
             }
@@ -120,12 +139,13 @@ public class SignListener implements Listener {
         Player player = e.getPlayer();
         UUID uuid = player.getUniqueId();
         Block block = e.getBlock();
+        boolean hasAdminBypass = plugin.getData().hasAdminBypass(uuid);
 
         if (plugin.getPU().getSupportedBlocks().contains(block.getType().name())) {
             TileState lockSign = getLockSign(block);
             if (lockSign != null) {
                 UUID owner =  plugin.getPU().getLockOwner(lockSign);
-                if (owner != null && !owner.equals(uuid)) {
+                if (owner != null && !owner.equals(uuid) && !hasAdminBypass) {
                     player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCKED.getString(new String[] { plugin.getPU().formatBlockName(block.getType().name()), Bukkit.getOfflinePlayer(owner).getName() }));
                     e.setCancelled(true);
                 } else {
@@ -147,13 +167,12 @@ public class SignListener implements Listener {
 
             if (container.has(key, PersistentDataType.STRING)) {
                 UUID owner = plugin.getPU().getLockOwner(state);
-                if (owner != null && !owner.equals(uuid)) {
+                if (owner != null && !owner.equals(uuid) && !hasAdminBypass) {
                     player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCKED.getString(new String[] { plugin.getPU().formatBlockName(blockBehind.getType().name()), Bukkit.getOfflinePlayer(owner).getName() }));
                     e.setCancelled(true);
                 } else {
                     block.getWorld().playSound(block.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 1);
                     player.sendMessage(Lang.PREFIX.getString(null) + Lang.MESSAGE_REMOVE_LOCK_SUCCESSFUL.getString(new String[] { plugin.getPU().formatBlockName(blockBehind.getType().name()) }));
-
                 }
             }
         }
