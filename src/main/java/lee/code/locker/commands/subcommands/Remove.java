@@ -68,7 +68,7 @@ public class Remove extends SubCommand {
                         Block blockBehind = block.getRelative(directional.getFacing().getOppositeFace());
 
                         UUID ownerUUID = plugin.getPU().getLockOwner(state);
-                        String targetName = Bukkit.getOfflinePlayer(targetUUID).getName();
+                        String targetName = args[1];
                         List<UUID> trusted = plugin.getPU().getLockTrusted(state);
 
                         if (ownerUUID != null) {

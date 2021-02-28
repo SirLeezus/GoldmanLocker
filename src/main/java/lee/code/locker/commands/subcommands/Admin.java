@@ -39,16 +39,14 @@ public class Admin extends SubCommand {
             String command = args[1];
             UUID uuid = player.getUniqueId();
 
-            switch (command) {
-                case "bypass":
-                    if (plugin.getData().hasAdminBypass(uuid)) {
-                        plugin.getData().removeAdminBypass(uuid);
-                        player.sendMessage(Lang.PREFIX.getString(null) + Lang.COMMAND_ADMIN_BYPASS_DISABLED.getString(null));
-                    } else {
-                        plugin.getData().addAdminBypass(uuid);
-                        player.sendMessage(Lang.PREFIX.getString(null) + Lang.COMMAND_ADMIN_BYPASS_ENABLED.getString(null));
-                    }
-                    break;
+            if (command.equals("bypass")) {
+                if (plugin.getData().hasAdminBypass(uuid)) {
+                    plugin.getData().removeAdminBypass(uuid);
+                    player.sendMessage(Lang.PREFIX.getString(null) + Lang.COMMAND_ADMIN_BYPASS_DISABLED.getString(null));
+                } else {
+                    plugin.getData().addAdminBypass(uuid);
+                    player.sendMessage(Lang.PREFIX.getString(null) + Lang.COMMAND_ADMIN_BYPASS_ENABLED.getString(null));
+                }
             }
         } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_COMMAND_ADMIN_ARGS.getString(null));
     }
