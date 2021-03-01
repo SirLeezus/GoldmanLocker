@@ -22,6 +22,7 @@ public enum Lang {
     MESSAGE_ADD_TRUST_SUCCESSFUL("&aYou successfully added &6{0} &ato this lock!"),
     MESSAGE_REMOVE_TRUST_SUCCESSFUL("&aYou successfully removed &6{0} &afrom your {1} lock."),
     ERROR_COMMAND_ADMIN_ARGS("&cYou need to specify which admin command you would like to run."),
+    ERROR_NOT_A_CONSOLE_COMMAND("&cThis is not a console command."),
     ERROR_LOCKED("&cThat {0} block is locked by &6{1}&c."),
     ERROR_TRUST_ADD_TARGET_PLAYER("&cYou need to input a player to add to the lock sign you're looking at."),
     ERROR_TRUST_REMOVE_TARGET_PLAYER("&cYou need to input a trusted player to remove them from the lock sign you're looking at."),

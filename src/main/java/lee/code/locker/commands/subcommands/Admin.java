@@ -53,6 +53,6 @@ public class Admin extends SubCommand {
 
     @Override
     public void performConsole(CommandSender console, String[] args) {
-
+        console.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_NOT_A_CONSOLE_COMMAND.getString(null));
     }
 }
