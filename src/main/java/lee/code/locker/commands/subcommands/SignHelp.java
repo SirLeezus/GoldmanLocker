@@ -23,12 +23,12 @@ public class SignHelp extends SubCommand {
 
     @Override
     public String getSyntax() {
-        return "/shop signhelp";
+        return "/lock signhelp";
     }
 
     @Override
     public String getPermission() {
-        return "shop.command.signhelp";
+        return "lock.command.signhelp";
     }
 
     @Override

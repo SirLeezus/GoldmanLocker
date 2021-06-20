@@ -124,7 +124,6 @@ public class SignListener implements Listener {
                             player.sendMessage(Lang.SIGN_INFO_TRUSTED.getString(new String[]{trustedNames}));
                             player.sendMessage("");
                             player.sendMessage(Lang.SIGN_INFO_FOOTER.getString(null));
-                            e.setCancelled(true);
                         }
                     }
                 }

@@ -6,7 +6,7 @@ import org.bukkit.ChatColor;
 
 @AllArgsConstructor
 public enum Lang {
-    PREFIX("&6&lLocker &e➔ &r"),
+    PREFIX("&c&lLocker &e➔ &r"),
     ERROR_NO_PERMISSION("&cYou sadly do not have permission for this."),
     MESSAGE_HELP_SUB_COMMAND("&3{0}&b. &e{1} &c| &7{2}"),
     MESSAGE_HELP_DIVIDER("&6▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"),

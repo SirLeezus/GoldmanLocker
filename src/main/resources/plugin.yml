@@ -1,7 +1,7 @@
 name: GoldmanLocker
 main: lee.code.locker.GoldmanLocker
 version: ${project.version}
-api-version: 1.16
+api-version: 1.17
 author: Lee
 commands:
   lock:
