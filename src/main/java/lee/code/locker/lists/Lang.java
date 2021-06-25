@@ -1,7 +1,9 @@
 package lee.code.locker.lists;
 
+import lee.code.locker.GoldmanLocker;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 
 @AllArgsConstructor
@@ -38,11 +40,20 @@ public enum Lang {
     ;
 
     @Getter private final String string;
+
     public String getString(String[] variables) {
         String value = ChatColor.translateAlternateColorCodes('&', string);
         if (variables == null) return value;
         else if (variables.length == 0) return value;
         for (int i = 0; i < variables.length; i++) value = value.replace("{" + i + "}", variables[i]);
         return ChatColor.translateAlternateColorCodes('&', value);
+    }
+
+    public Component getComponent(String[] variables) {
+        GoldmanLocker plugin = GoldmanLocker.getPlugin();
+        String value = string;
+        if (variables == null || variables.length == 0) return plugin.getPU().formatC(value);
+        for (int i = 0; i < variables.length; i++) value = value.replace("{" + i + "}", variables[i]);
+        return plugin.getPU().formatC(value);
     }
 }

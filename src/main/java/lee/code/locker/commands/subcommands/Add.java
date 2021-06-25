@@ -74,11 +74,11 @@ public class Add extends SubCommand {
                                     if (trusted != null) {
                                         if (!trusted.contains(targetUUID)) {
                                             if (trusted.size() >= Values.MAX_TRUSTED.getValue()) {
-                                                player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUSTED_MAX.getString(new String[] { String.valueOf(Values.MAX_TRUSTED.getValue()) }));
+                                                player.sendMessage(Lang.PREFIX.getComponent(null).append(Lang.ERROR_TRUSTED_MAX.getComponent(new String[] { String.valueOf(Values.MAX_TRUSTED.getValue()) })));
                                                 return;
-                                            } else sTrusted = StringUtils.join(trusted, ",") + "," + targetUUID.toString();
+                                            } else sTrusted = StringUtils.join(trusted, ",") + "," + targetUUID;
                                         } else {
-                                            player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_ADD_ALREADY_ADDED.getString(new String[]{targetName}));
+                                            player.sendMessage(Lang.PREFIX.getComponent(null).append(Lang.ERROR_TRUST_ADD_ALREADY_ADDED.getComponent(new String[]{targetName})));
                                             return;
                                         }
                                     }
@@ -88,17 +88,17 @@ public class Add extends SubCommand {
                                     container.set(trustedKey, PersistentDataType.STRING, sTrusted);
                                     state.update();
 
-                                    player.sendMessage(Lang.PREFIX.getString(null) + Lang.MESSAGE_ADD_TRUST_SUCCESSFUL.getString(new String[]{targetName, plugin.getPU().formatBlockName(blockBehind.getType().name())}));
-                                } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_ADD_OWNER.getString(null));
-                            } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_ADD_NOT_OWNER.getString(new String[]{ownerName}));
-                        } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCK_SIGN_NOT_FOUND.getString(null));
-                    } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCK_SIGN_NOT_FOUND.getString(null));
-                } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCK_SIGN_NOT_FOUND.getString(null));
-            } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_PLAYER_NOT_FOUND.getString(new String[]{args[1]}));
-        } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_ADD_TARGET_PLAYER.getString(null));
+                                    player.sendMessage(Lang.PREFIX.getComponent(null).append(Lang.MESSAGE_ADD_TRUST_SUCCESSFUL.getComponent(new String[]{targetName, plugin.getPU().formatBlockName(blockBehind.getType().name())})));
+                                } else player.sendMessage(Lang.PREFIX.getComponent(null).append(Lang.ERROR_TRUST_ADD_OWNER.getComponent(null)));
+                            } else player.sendMessage(Lang.PREFIX.getComponent(null).append(Lang.ERROR_TRUST_ADD_NOT_OWNER.getComponent(new String[]{ownerName})));
+                        } else player.sendMessage(Lang.PREFIX.getComponent(null).append(Lang.ERROR_LOCK_SIGN_NOT_FOUND.getComponent(null)));
+                    } else player.sendMessage(Lang.PREFIX.getComponent(null).append(Lang.ERROR_LOCK_SIGN_NOT_FOUND.getComponent(null)));
+                } else player.sendMessage(Lang.PREFIX.getComponent(null).append(Lang.ERROR_LOCK_SIGN_NOT_FOUND.getComponent(null)));
+            } else player.sendMessage(Lang.PREFIX.getComponent(null).append(Lang.ERROR_PLAYER_NOT_FOUND.getComponent(new String[]{args[1]})));
+        } else player.sendMessage(Lang.PREFIX.getComponent(null).append(Lang.ERROR_TRUST_ADD_TARGET_PLAYER.getComponent(null)));
     }
     @Override
     public void performConsole(CommandSender console, String[] args) {
-        console.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_NOT_A_CONSOLE_COMMAND.getString(null));
+        console.sendMessage(Lang.PREFIX.getComponent(null).append(Lang.ERROR_NOT_A_CONSOLE_COMMAND.getComponent(null)));
     }
 }

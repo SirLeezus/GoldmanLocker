@@ -2,6 +2,7 @@ package lee.code.locker.listeners;
 
 import lee.code.locker.GoldmanLocker;
 import lee.code.locker.lists.Lang;
+import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.*;
 import org.bukkit.block.data.BlockData;
@@ -35,22 +36,18 @@ public class SignListener implements Listener {
         UUID uuid = player.getUniqueId();
         Block block = e.getBlock();
         BlockData data = block.getBlockData();
-        String line1 = e.getLine(0);
+        String line1 = plugin.getPU().unFormatC(e.line(0));
 
         if (line1 != null && line1.equals("[lock]")) {
-
-            if (data instanceof Directional) {
-
-                Directional directional = (Directional) data;
+            if (data instanceof Directional directional) {
                 Block blockBehind = block.getRelative(directional.getFacing().getOppositeFace());
-
                 if (plugin.getPU().getSupportedBlocks().contains(blockBehind.getType().name())) {
 
                     if (getLockSign(blockBehind) == null) {
-                        e.setLine(0, plugin.getPU().format("&6[&cLocked&6]"));
-                        e.setLine(1, plugin.getPU().format("&e" + e.getPlayer().getName()));
-                        e.setLine(2, "");
-                        e.setLine(3, "");
+                        e.line(0, plugin.getPU().formatC("&6[&cLocked&6]"));
+                        e.line(1, plugin.getPU().formatC("&e" + e.getPlayer().getName()));
+                        e.line(2, Component.text(""));
+                        e.line(3, Component.text(""));
 
                         TileState state = (TileState) block.getState();
                         PersistentDataContainer container = state.getPersistentDataContainer();
@@ -60,8 +57,8 @@ public class SignListener implements Listener {
                         container.set(trusted, PersistentDataType.STRING, "");
                         state.update();
 
-                        player.sendMessage(Lang.PREFIX.getString(null) + Lang.MESSAGE_LOCK_SUCCESSFUL.getString(new String[] { plugin.getPU().formatBlockName(blockBehind.getType().name()) }));
-                    } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_BLOCK_ALREADY_HAS_LOCK.getString(null));
+                        player.sendMessage(Lang.PREFIX.getComponent(null).append(Lang.MESSAGE_LOCK_SUCCESSFUL.getComponent(new String[] { plugin.getPU().formatBlockName(blockBehind.getType().name()) })));
+                    } else player.sendMessage(Lang.PREFIX.getComponent(null).append(Lang.ERROR_BLOCK_ALREADY_HAS_LOCK.getComponent(null)));
                 }
             }
         }
@@ -91,7 +88,7 @@ public class SignListener implements Listener {
                         List<UUID> trusted = plugin.getPU().getLockTrusted(lockSign);
                         if (trusted == null || !trusted.contains(uuid)) {
                             if (owner != null && !owner.equals(uuid) && !hasAdminBypass) {
-                                player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCKED.getString(new String[]{plugin.getPU().formatBlockName(block.getType().name()), Bukkit.getOfflinePlayer(owner).getName()}));
+                                player.sendMessage(Lang.PREFIX.getComponent(null).append(Lang.ERROR_LOCKED.getComponent(new String[]{plugin.getPU().formatBlockName(block.getType().name()), Bukkit.getOfflinePlayer(owner).getName()})));
                                 e.setCancelled(true);
                             }
                         }
@@ -118,12 +115,16 @@ public class SignListener implements Listener {
                         if (owner != null) {
                             if (trusted != null) trustedNames = plugin.getPU().getTrustedString(trusted);
                             if (owner.equals(uuid)) nameSignCheck(sign, uuid);
-                            player.sendMessage(Lang.SIGN_INFO_HEADER.getString(null));
-                            player.sendMessage("");
-                            player.sendMessage(Lang.SIGN_INFO_OWNER.getString(new String[]{Bukkit.getOfflinePlayer(owner).getName()}));
-                            player.sendMessage(Lang.SIGN_INFO_TRUSTED.getString(new String[]{trustedNames}));
-                            player.sendMessage("");
-                            player.sendMessage(Lang.SIGN_INFO_FOOTER.getString(null));
+                            List<Component> lines = new ArrayList<>();
+
+                            lines.add(Lang.SIGN_INFO_HEADER.getComponent(null));
+                            lines.add(Component.text(""));
+                            lines.add(Lang.SIGN_INFO_OWNER.getComponent(new String[]{Bukkit.getOfflinePlayer(owner).getName()}));
+                            lines.add(Lang.SIGN_INFO_TRUSTED.getComponent(new String[]{trustedNames}));
+                            lines.add(Component.text(""));
+                            lines.add(Lang.SIGN_INFO_FOOTER.getComponent(null));
+
+                            for (Component line : lines) player.sendMessage(line);
                         }
                     }
                 }
@@ -145,12 +146,12 @@ public class SignListener implements Listener {
             if (lockSign != null) {
                 UUID owner =  plugin.getPU().getLockOwner(lockSign);
                 if (owner != null && !owner.equals(uuid) && !hasAdminBypass) {
-                    player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCKED.getString(new String[] { plugin.getPU().formatBlockName(block.getType().name()), Bukkit.getOfflinePlayer(owner).getName() }));
+                    player.sendMessage(Lang.PREFIX.getComponent(null).append(Lang.ERROR_LOCKED.getComponent(new String[] { plugin.getPU().formatBlockName(block.getType().name()), Bukkit.getOfflinePlayer(owner).getName() })));
                     e.setCancelled(true);
                 } else {
                     if (blockHasSign(block)) {
                         block.getWorld().playSound(block.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 1);
-                        player.sendMessage(Lang.PREFIX.getString(null) + Lang.MESSAGE_REMOVE_LOCK_SUCCESSFUL.getString(new String[] { plugin.getPU().formatBlockName(block.getType().name()) }));
+                        player.sendMessage(Lang.PREFIX.getComponent(null).append(Lang.MESSAGE_REMOVE_LOCK_SUCCESSFUL.getComponent(new String[] { plugin.getPU().formatBlockName(block.getType().name()) })));
                     }
                 }
             }
@@ -167,11 +168,11 @@ public class SignListener implements Listener {
             if (container.has(key, PersistentDataType.STRING)) {
                 UUID owner = plugin.getPU().getLockOwner(state);
                 if (owner != null && !owner.equals(uuid) && !hasAdminBypass) {
-                    player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCKED.getString(new String[] { plugin.getPU().formatBlockName(blockBehind.getType().name()), Bukkit.getOfflinePlayer(owner).getName() }));
+                    player.sendMessage(Lang.PREFIX.getComponent(null).append(Lang.ERROR_LOCKED.getComponent(new String[] { plugin.getPU().formatBlockName(blockBehind.getType().name()), Bukkit.getOfflinePlayer(owner).getName() })));
                     e.setCancelled(true);
                 } else {
                     block.getWorld().playSound(block.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 1);
-                    player.sendMessage(Lang.PREFIX.getString(null) + Lang.MESSAGE_REMOVE_LOCK_SUCCESSFUL.getString(new String[] { plugin.getPU().formatBlockName(blockBehind.getType().name()) }));
+                    player.sendMessage(Lang.PREFIX.getComponent(null).append(Lang.MESSAGE_REMOVE_LOCK_SUCCESSFUL.getComponent(new String[] { plugin.getPU().formatBlockName(blockBehind.getType().name()) })));
                 }
             }
         }
@@ -240,10 +241,7 @@ public class SignListener implements Listener {
             Block relativeBlock = block.getRelative(face);
             BlockState relativeBlockState = relativeBlock.getState();
 
-            if (blockState instanceof Chest && relativeBlockState instanceof Chest) {
-
-                Chest chest = (Chest) blockState;
-                Chest relativeChest = (Chest) relativeBlockState;
+            if (blockState instanceof Chest chest && relativeBlockState instanceof Chest relativeChest) {
 
                 InventoryHolder inventoryHolder = chest.getInventory().getHolder();
                 InventoryHolder relativeInventoryHolder = relativeChest.getInventory().getHolder();
@@ -298,9 +296,9 @@ public class SignListener implements Listener {
     private void nameSignCheck(Sign sign, UUID owner) {
         GoldmanLocker plugin = GoldmanLocker.getPlugin();
 
-        if (!sign.getLine(1).equals(Bukkit.getOfflinePlayer(owner).getName())) {
-            sign.setLine(1, plugin.getPU().format("&e" + Bukkit.getOfflinePlayer(owner).getName()));
+        if (!plugin.getPU().unFormatC(sign.line(1)).equals(Bukkit.getOfflinePlayer(owner).getName())) {
+            sign.line(1, plugin.getPU().formatC("&e" + Bukkit.getOfflinePlayer(owner).getName()));
+            sign.update();
         }
-        sign.update();
     }
 }

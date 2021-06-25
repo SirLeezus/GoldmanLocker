@@ -13,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.StringUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -22,11 +23,10 @@ public class TabCompletion implements TabCompleter {
     private final List<String> subCommands = Arrays.asList("add", "remove", "admin", "signhelp", "help");
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
         GoldmanLocker plugin = GoldmanLocker.getPlugin();
 
-        if (sender instanceof Player) {
-            Player player = (Player) sender;
+        if (sender instanceof Player player) {
 
             if (args.length == 1) {
                 List<String> hasCommand = new ArrayList<>();

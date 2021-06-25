@@ -2,6 +2,9 @@ package lee.code.locker;
 
 import lee.code.locker.lists.SupportedBlocks;
 import lee.code.locker.lists.Values;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -22,6 +25,16 @@ public class PU {
 
     public String format(String format) {
         return ChatColor.translateAlternateColorCodes('&', format);
+    }
+
+    public Component formatC(String message) {
+        LegacyComponentSerializer serializer = LegacyComponentSerializer.legacyAmpersand();
+        return Component.empty().decoration(TextDecoration.ITALIC, false).append(serializer.deserialize(message));
+    }
+
+    public String unFormatC(Component message) {
+        LegacyComponentSerializer serializer = LegacyComponentSerializer.legacyAmpersand();
+        return serializer.serialize(message);
     }
 
     public List<String> getSupportedBlocks() {

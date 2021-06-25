@@ -86,19 +86,19 @@ public class Remove extends SubCommand {
                                         container.set(trustedKey, PersistentDataType.STRING, sTrusted);
                                         state.update();
 
-                                        player.sendMessage(Lang.PREFIX.getString(null) + Lang.MESSAGE_REMOVE_TRUST_SUCCESSFUL.getString(new String[]{targetName, plugin.getPU().formatBlockName(blockBehind.getType().name())}));
-                                    } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_REMOVE_NOT_TRUSTED.getString(new String[]{targetName, plugin.getPU().formatBlockName(blockBehind.getType().name())}));
-                                } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_REMOVE_NOT_TRUSTED.getString(new String[]{targetName, plugin.getPU().formatBlockName(blockBehind.getType().name())}));
-                            } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_REMOVE_NOT_OWNER.getString(new String[]{ownerName}));
-                        } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCK_SIGN_NOT_FOUND.getString(null));
-                    } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCK_SIGN_NOT_FOUND.getString(null));
-                } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_LOCK_SIGN_NOT_FOUND.getString(null));
-            }  else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_PLAYER_NOT_FOUND.getString(new String[]{ args[1] }));
-        } else player.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_TRUST_REMOVE_TARGET_PLAYER.getString(null));
+                                        player.sendMessage(Lang.PREFIX.getComponent(null).append(Lang.MESSAGE_REMOVE_TRUST_SUCCESSFUL.getComponent(new String[]{targetName, plugin.getPU().formatBlockName(blockBehind.getType().name())})));
+                                    } else player.sendMessage(Lang.PREFIX.getComponent(null).append(Lang.ERROR_TRUST_REMOVE_NOT_TRUSTED.getComponent(new String[]{targetName, plugin.getPU().formatBlockName(blockBehind.getType().name())})));
+                                } else player.sendMessage(Lang.PREFIX.getComponent(null).append(Lang.ERROR_TRUST_REMOVE_NOT_TRUSTED.getComponent(new String[]{targetName, plugin.getPU().formatBlockName(blockBehind.getType().name())})));
+                            } else player.sendMessage(Lang.PREFIX.getComponent(null).append(Lang.ERROR_TRUST_REMOVE_NOT_OWNER.getComponent(new String[]{ownerName})));
+                        } else player.sendMessage(Lang.PREFIX.getComponent(null).append(Lang.ERROR_LOCK_SIGN_NOT_FOUND.getComponent(null)));
+                    } else player.sendMessage(Lang.PREFIX.getComponent(null).append(Lang.ERROR_LOCK_SIGN_NOT_FOUND.getComponent(null)));
+                } else player.sendMessage(Lang.PREFIX.getComponent(null).append(Lang.ERROR_LOCK_SIGN_NOT_FOUND.getComponent(null)));
+            }  else player.sendMessage(Lang.PREFIX.getComponent(null).append(Lang.ERROR_PLAYER_NOT_FOUND.getComponent(new String[]{ args[1] })));
+        } else player.sendMessage(Lang.PREFIX.getComponent(null).append(Lang.ERROR_TRUST_REMOVE_TARGET_PLAYER.getComponent(null)));
     }
 
     @Override
     public void performConsole(CommandSender console, String[] args) {
-        console.sendMessage(Lang.PREFIX.getString(null) + Lang.ERROR_NOT_A_CONSOLE_COMMAND.getString(null));
+        console.sendMessage(Lang.PREFIX.getComponent(null).append(Lang.ERROR_NOT_A_CONSOLE_COMMAND.getComponent(null)));
     }
 }

@@ -6,4 +6,4 @@ author: Lee
 commands:
   lock:
     description: Main command for locker plugin.
-    permission: lock.command.use
+    permission: lock.command.lock
