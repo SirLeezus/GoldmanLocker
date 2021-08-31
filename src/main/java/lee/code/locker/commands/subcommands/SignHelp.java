@@ -47,7 +47,7 @@ public class SignHelp extends SubCommand {
         lines.add(Component.text(""));
         lines.add(plugin.getPU().formatC("&6Line 1&7: &f[lock]"));
         lines.add(Component.text(""));
-        lines.add(plugin.getPU().formatC("&eCongratulations! If you followed this guide correctly you should have locked the block you place the sign on! Now only you and trusted players can interact with that block and only you will be able to break the block."));
+        lines.add(plugin.getPU().formatC("&eCongratulations! If you followed this guide correctly you should have locked the block you placed the sign on! Now only you and trusted players can interact with that block and only you will be able to break the block."));
         lines.add(Component.text(""));
         lines.add(Lang.MESSAGE_HELP_DIVIDER.getComponent(null));
 

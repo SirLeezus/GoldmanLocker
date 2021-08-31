@@ -10,6 +10,7 @@ import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.type.WallSign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -28,8 +29,8 @@ import java.util.*;
 
 public class SignListener implements Listener {
 
-    @EventHandler
-    public void onSignEditEvent(SignChangeEvent e) {
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onLockSignCreate(SignChangeEvent e) {
         GoldmanLocker plugin = GoldmanLocker.getPlugin();
 
         Player player = e.getPlayer();
@@ -42,17 +43,19 @@ public class SignListener implements Listener {
             if (data instanceof Directional directional) {
                 Block blockBehind = block.getRelative(directional.getFacing().getOppositeFace());
                 if (plugin.getPU().getSupportedBlocks().contains(blockBehind.getType().name())) {
-
                     if (getLockSign(blockBehind) == null) {
-                        e.line(0, plugin.getPU().formatC("&6[&cLocked&6]"));
+
+                        e.line(0, Lang.LOCK_SIGN.getComponent(null));
                         e.line(1, plugin.getPU().formatC("&e" + e.getPlayer().getName()));
                         e.line(2, Component.text(""));
                         e.line(3, Component.text(""));
 
                         TileState state = (TileState) block.getState();
                         PersistentDataContainer container = state.getPersistentDataContainer();
+
                         NamespacedKey owner = new NamespacedKey(plugin, "lock-owner");
                         NamespacedKey trusted = new NamespacedKey(plugin, "lock-trusted");
+
                         container.set(owner, PersistentDataType.STRING, uuid.toString());
                         container.set(trusted, PersistentDataType.STRING, "");
                         state.update();

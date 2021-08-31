@@ -17,6 +17,7 @@ public enum Lang {
     SIGN_INFO_TRUSTED("&e&lTrusted&7: &6{0}"),
     SIGN_INFO_FOOTER("&6--------------------------------"),
     MESSAGE_HELP_TITLE("                      &e-== &c&l&nLocker Help&r &e==-"),
+    LOCK_SIGN("&6[&cLocked&6]"),
     COMMAND_ADMIN_BYPASS_ENABLED("&aAdmin claim bypass is now &2enabled&a!"),
     COMMAND_ADMIN_BYPASS_DISABLED("&aAdmin claim bypass is now &cdisabled&a."),
     MESSAGE_LOCK_SUCCESSFUL("&aThat {0} block is now locked for you!"),

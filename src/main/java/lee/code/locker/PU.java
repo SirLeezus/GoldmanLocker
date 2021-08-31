@@ -5,6 +5,7 @@ import lee.code.locker.lists.Values;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -33,7 +34,7 @@ public class PU {
     }
 
     public String unFormatC(Component message) {
-        LegacyComponentSerializer serializer = LegacyComponentSerializer.legacyAmpersand();
+        PlainTextComponentSerializer serializer = PlainTextComponentSerializer.plainText();
         return serializer.serialize(message);
     }
 
