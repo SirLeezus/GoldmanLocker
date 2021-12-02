@@ -37,9 +37,9 @@ public class SignListener implements Listener {
         UUID uuid = player.getUniqueId();
         Block block = e.getBlock();
         BlockData data = block.getBlockData();
-        String line1 = plugin.getPU().unFormatC(e.line(0));
+        String line1 = plugin.getPU().unFormatC(e.line(0)).toLowerCase();
 
-        if (line1 != null && line1.equals("[lock]")) {
+        if (line1.equals("[lock]")) {
             if (data instanceof Directional directional) {
                 Block blockBehind = block.getRelative(directional.getFacing().getOppositeFace());
                 if (plugin.getPU().getSupportedBlocks().contains(blockBehind.getType().name())) {
@@ -103,6 +103,8 @@ public class SignListener implements Listener {
                     NamespacedKey key = new NamespacedKey(plugin, "lock-owner");
 
                     if (container.has(key, PersistentDataType.STRING)) {
+
+                        if (player.getInventory().getItemInMainHand().getType().equals(Material.GLOW_INK_SAC)) e.setCancelled(true);
 
                         if (plugin.getData().hasPlayerClickDelay(uuid)) {
                             e.setCancelled(true); return;
