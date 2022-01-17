@@ -29,7 +29,7 @@ public class Remove extends SubCommand {
 
     @Override
     public String getDescription() {
-        return "Remove a trusted player from the lock you're looking at.";
+        return "Removes a trusted player from a lock sign you're looking at.";
     }
 
     @Override

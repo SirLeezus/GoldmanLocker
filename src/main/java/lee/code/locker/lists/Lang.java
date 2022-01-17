@@ -10,7 +10,8 @@ import org.bukkit.ChatColor;
 public enum Lang {
     PREFIX("&c&lLocker &e➔ &r"),
     ERROR_NO_PERMISSION("&cYou sadly do not have permission for this."),
-    MESSAGE_HELP_SUB_COMMAND("&3{0}&b. &e{1} &c| &7{2}"),
+    MESSAGE_HELP_SUB_COMMAND("&3{0}&b. &e{1}"),
+    MESSAGE_HELP_SUB_COMMAND_HOVER("&6{0}"),
     MESSAGE_HELP_DIVIDER("&6▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"),
     SIGN_INFO_HEADER("&6--------- &7[ &c&lLock Info &7] &6---------"),
     SIGN_INFO_OWNER("&e&lOwner&7: &6{0}"),

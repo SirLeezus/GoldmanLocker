@@ -19,7 +19,7 @@ public class SignHelp extends SubCommand {
 
     @Override
     public String getDescription() {
-        return "How to create a lock with a sign.";
+        return "A guide on how to lock a container with a sign.";
     }
 
     @Override

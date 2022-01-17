@@ -29,7 +29,7 @@ public class Add extends SubCommand {
 
     @Override
     public String getDescription() {
-        return "Add a trusted player to the lock sign you're looking at.";
+        return "Adds a trusted player to a lock sign you're looking at.";
     }
 
     @Override

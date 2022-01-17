@@ -6,6 +6,7 @@ import lee.code.locker.commands.subcommands.Remove;
 import lee.code.locker.commands.subcommands.SignHelp;
 import lee.code.locker.lists.Lang;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -49,7 +50,8 @@ public class CommandManager implements CommandExecutor {
 
             for (SubCommand subCommand : subCommands) {
                 if (player.hasPermission(subCommand.getPermission())) {
-                    lines.add(Lang.MESSAGE_HELP_SUB_COMMAND.getComponent(new String[]{String.valueOf(number), subCommand.getSyntax(), subCommand.getDescription()}));
+                    String suggestCommand = subCommand.getSyntax().contains(" ") ? subCommand.getSyntax().split(" ")[0] : subCommand.getSyntax();
+                    lines.add(Lang.MESSAGE_HELP_SUB_COMMAND.getComponent(new String[] { String.valueOf(number), subCommand.getSyntax() }).hoverEvent(Lang.MESSAGE_HELP_SUB_COMMAND_HOVER.getComponent(new String[] {  subCommand.getDescription() })).clickEvent(ClickEvent.clickEvent(ClickEvent.Action.SUGGEST_COMMAND, suggestCommand)));
                     number++;
                 }
             }
