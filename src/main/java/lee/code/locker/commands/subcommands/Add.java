@@ -4,7 +4,7 @@ import lee.code.locker.GoldmanLocker;
 import lee.code.locker.commands.SubCommand;
 import lee.code.locker.lists.Lang;
 import lee.code.locker.lists.Values;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
